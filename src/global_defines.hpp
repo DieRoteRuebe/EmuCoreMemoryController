@@ -8,7 +8,7 @@
 #define DEBUG
 // Use this define for Thread information and controller states over stderr, stdout
 // Can result in mixed messages due to threading but prints atleast all the information you need
-//#define CONTROLLER_DEBUG
+#define CONTROLLER_DEBUG
 
 
 // make sure to define the endianness of the system

@@ -247,10 +247,6 @@ uint64_t Memory_Controller_Core::get_from_output_queue(uint64_t index) {
 #endif
             return 0;
         }
-
-#ifdef DEBUG
-            LOG_DEBUG("[PRODUCER]: Timeout while waiting for output queue at index: " + std::to_string(index));
-#endif
     }
     uint64_t out = queue[index].data;
 #ifdef CONTROLLER_DEBUG
