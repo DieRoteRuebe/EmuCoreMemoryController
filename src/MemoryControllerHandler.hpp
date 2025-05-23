@@ -40,12 +40,12 @@ class MemoryControllerHandler {
 
                     if(in.op == READ) {
                         in.data = con->get_from_output_queue(index);
-#ifdef DEBUG
+#ifdef CONTROLLER_DEBUG
                         std::cout << "WRITE: slot=" << index << " addr=" << in.address << " data=" << in.data << std::endl;
                         debug_controller_state();
 #endif
                     } else {
-#ifdef DEBUG
+#ifdef CONTROLLER_DEBUG
                         std::cout << "READ: slot=" << index << " addr=" << in.address << std::endl;
                         debug_controller_state();
 #endif                    

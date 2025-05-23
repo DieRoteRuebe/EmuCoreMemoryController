@@ -114,7 +114,7 @@ void Memory_Controller_Core::loop() {
             LOG_DEBUG("[MEMORY CONTROLLER]: extraced item from queue slot: "+std::to_string(in->slot)+" -> Read operation");
 #endif  
                     uint64_t out = get_item(_mem_ptr, in->address, in->size);
-#ifdef DEBUG
+#ifdef CONTROLLER_DEBUG
                     last_read_result = out;
 #endif
                     add_to_output_queue(out, in->slot);
