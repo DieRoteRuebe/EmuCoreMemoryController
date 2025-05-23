@@ -37,7 +37,7 @@ class RingBuffer {
 
         *item = _requests[tail];
 #ifdef CONTROLLER_DEBUG
-        _requests[tail] = nullptr; // Debug: Slot als frei markieren
+        _requests[tail] = nullptr;
 #endif        
         _tail.store((tail+1) % MAX_REQUESTS, std::memory_order_release);
 

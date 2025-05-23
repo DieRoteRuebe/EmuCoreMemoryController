@@ -3,62 +3,7 @@
 #include <iostream>
 #include <chrono>
 int main() {
-    
-    // Example 1:
-    // This is the Showcase example:
-    SET_LOG_LEVEL(LogLevel::LOG_DEBUG);
-    MemoryControllerHandler handler;
-    Memory_Controller_Core* mem_controller = new Memory_Controller_Core;
-    mem_controller->init(ONE_GB);
-    mem_controller->start();
-    handler.add_controller(mem_controller);
-    CLEAR_ALL_ERROR; // clear the error register
-    // Simulate some operations:
-    queue_item in1;
-    queue_item out1;
-    queue_item in2;
-    queue_item out2;
-    // store some data in memory:
-    LOG_INFO("Storing data in memory");
-    in1.op = memory_ops::WRITE;
-    in1.address = 0x0;
-    in1.data = 0xC0FFEE;
-    in1.size = 3; // size in bytes
-    handler.add_to_queue(in1);
-    in2.op = memory_ops::WRITE;
-    in2.address += in1.size;
-    in2.data = 0xDEADBEEF;
-    in2.size = 4; // size in bytes
-    handler.add_to_queue(in2);
-    CATCH_ALL_ERROR {
-        LOG_INFO("Error occured, exit the program now");
-        return 1;
-    }
-    // read some data from memory:
-    LOG_INFO("Retrieving data from memory");
-    out1.op = memory_ops::READ;
-    out1.address = 0x0;
-    out1.size = 3; 
-    handler.add_to_queue(out1);
-    out2.op = memory_ops::READ;
-    out2.address += out1.size;
-    out2.size = 4; 
-    handler.add_to_queue(out2);
-    CATCH_ALL_ERROR {
-        LOG_INFO("Error occured, exit the program now");
-        return 1;
-    }
-    CATCH_ALL_ERROR {
-        LOG_INFO("Error occured, exit the program now");
-        return 1;
-    }
-    std::cout << "Data read from memory: " << std::hex << out1.data << ", " << out2.data << std::endl;
-    // stop will cancel all threads exit them out and free memory
-    handler.stop_controllers();
-    usleep(100); //simply wait for the threads to exit
-
-        
-     /*
+#ifdef PERFORMANCE_TEST
     // This is the performance example:
     MemoryControllerHandler handler;
     Memory_Controller_Core* mem_controller = new Memory_Controller_Core();
@@ -121,7 +66,60 @@ int main() {
     std::cout << "Ops: " << ops << std::endl;
     std::cout << "Done. Duration: " << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << "s"  << ", " << duration_ms << " ms"<< std::endl;
     handler.stop_controllers();
-    */
+#else
+    // Example 1:
+    // This is the Showcase example:
+    SET_LOG_LEVEL(LogLevel::LOG_DEBUG);
+    MemoryControllerHandler handler;
+    Memory_Controller_Core* mem_controller = new Memory_Controller_Core;
+    mem_controller->init(ONE_GB);
+    mem_controller->start();
+    handler.add_controller(mem_controller);
+    CLEAR_ALL_ERROR; // clear the error register
+    // Simulate some operations:
+    queue_item in1;
+    queue_item out1;
+    queue_item in2;
+    queue_item out2;
+    // store some data in memory:
+    LOG_INFO("Storing data in memory");
+    in1.op = memory_ops::WRITE;
+    in1.address = 0x0;
+    in1.data = 0xC0FFEE;
+    in1.size = 3; // size in bytes
+    handler.add_to_queue(in1);
+    in2.op = memory_ops::WRITE;
+    in2.address += in1.size;
+    in2.data = 0xDEADBEEF;
+    in2.size = 4; // size in bytes
+    handler.add_to_queue(in2);
+    CATCH_ALL_ERROR {
+        LOG_INFO("Error occured, exit the program now");
+        return 1;
+    }
+    // read some data from memory:
+    LOG_INFO("Retrieving data from memory");
+    out1.op = memory_ops::READ;
+    out1.address = 0x0;
+    out1.size = 3; 
+    handler.add_to_queue(out1);
+    out2.op = memory_ops::READ;
+    out2.address += out1.size;
+    out2.size = 4; 
+    handler.add_to_queue(out2);
+    CATCH_ALL_ERROR {
+        LOG_INFO("Error occured, exit the program now");
+        return 1;
+    }
+    CATCH_ALL_ERROR {
+        LOG_INFO("Error occured, exit the program now");
+        return 1;
+    }
+    std::cout << "Data read from memory: " << std::hex << out1.data << ", " << out2.data << std::endl;
+    // stop will cancel all threads exit them out and free memory
+    handler.stop_controllers();
+    usleep(100); //simply wait for the threads to exit
+#endif
 
     return 0;
 }

@@ -70,6 +70,20 @@ void Memory_Controller_Core::start() {
     pthread_create(&thread, NULL, thread_entry, this);
 }
 
+void Memory_Controller_Core::set_affinity(int core_id) {
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);             // leeres Set
+    CPU_SET(core_id, &cpuset);     // gewünschten Core setzen
+
+    pthread_t thread = pthread_self();
+    int ret = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+    if (ret != 0) {
+       std::cerr << "Fehler bei set_affinity: " << strerror(ret) << "\n";
+    } else {
+        std::cout << "Thread auf Core " << core_id << " gesetzt.\n";
+    }   
+}
+
 void Memory_Controller_Core::stop() {
     if(!running) {
         // thread alrdy exited and stopped by its own
@@ -148,6 +162,7 @@ void Memory_Controller_Core::loop() {
 
 void* thread_entry(void* arg) {
     Memory_Controller_Core* core = (Memory_Controller_Core*)arg;
+    //core->set_affinity(1);
 #ifdef DEBUG
     LOG_DEBUG("[MEMORY CONTROLLER]: thread started");
 #endif
@@ -214,17 +229,6 @@ bool Memory_Controller_Core::get_from_input_queue(queue_item*& in) {
     if(!reqs.consumer_pop(&ptr)) {
         return false;
     }
-    
-    /*
-    for(uint64_t i = 0; i < QUEUE_SLOTS; i++) {
-        // we dont need atomic checking here the controller is allowed to step over since its single threaded
-        if(queue_status_bitarray[i].load() == 2) {
-            // valid input
-            *in = queue[i];
-            return i;
-        }
-    }
-    */
    in = ptr;
 #ifdef DEBUG
         LOG_DEBUG("Item: address: "+std::to_string(in->address)+" data: "+std::to_string(in->data)+" operation: "+std::to_string(in->op)+" slot: "+std::to_string(in->slot));
@@ -311,21 +315,66 @@ uint64_t Memory_Controller_Core::get_item(uint8_t* mem, uint64_t in_address, uin
 #ifdef IS_BIG_ENDIAN
         // BIG ENDIAN READ
         // here we will read byte after byte until we reach the given size
-        for(int i = 0; i < size; i++) {
-            data |= (*(uint8_t*)(address + size - 1 - i) << (i * 8));
+        int i = 0;
+        switch(size) {
+            case 8: {
+                data = *(uint64_t*)address;
+                return data;
+                break;
+            }
+            case 4: {
+                data = *(uint32_t*)address;
+                return data;
+                break;                
+            }
+            case 2: {
+                data = *(uint16_t*)address;
+                return data;
+                break;                      
+            }
+            default: {
+                do {
+                    data |= (*(uint8_t*)(address + size - 1 - i) << (i * 8));
+                    i++;
+                }while(i < size);
+                return data;
+                break;
+            }
         }
         return data;
 #endif
 #ifdef IS_LITTLE_ENDIAN
         // LITTLE ENDIAN READ
         // here we will read byte after byte until we reach the given size
-        for (int i = 0; i < size; i++) {
-            data |= ((uint64_t)(*(uint8_t*)(address + i)) << (i * 8));
+        int i = 0;
+        switch(size) {
+            case 8: {
+                data = *(uint64_t*)address;
+                return data;
+                break;
+            }
+            case 4: {
+                data = *(uint32_t*)address;
+                return data;
+                break;                
+            }
+            case 2: {
+                data = *(uint16_t*)address;
+                return data;
+                break;                      
+            }
+            default: {
+                do {
+                    data |= ((uint64_t)(*(uint8_t*)(address + i)) << (i * 8));
+                    i++;
+                }while(i < size);
+                return data;
+                break;
+            }
         }
 #ifdef CONTROLLER_DEBUG
         std::cout << "Reading on address:" << address << " data read: " << data << " size:" << size << std::endl;          
 #endif
-        
         return data;
 #endif
 
@@ -342,18 +391,59 @@ void Memory_Controller_Core::set_item(uint8_t* mem, uint64_t in_address, uint64_
 #ifdef IS_BIG_ENDIAN
         // BIG ENDIAN WRITE
         // here we will write byte after byte until we reach the given size
-        for(int i = 0; i < size; i++) {
-            *(uint8_t*)(address +size -1 - i) = (data >> (i * 8)) & 0xFF;
+        int i = 0;
+        switch(size) {
+            case 8: {
+                *(uint64_t*)address = data;
+                return;
+                break;
+            }
+            case 4: {
+                *(uint32_t*)address = data;
+                return;
+                break;
+            }
+            case 2: {
+                *(uint16_t*)address = data;
+                return;
+                break;
+            }
+            default: {
+                do{
+                    *(uint8_t*)(address +size -1 - i) = (data >> (i * 8)) & 0xFF;
+                    i++;
+                }while(i < size);
+            }
         }
         return;
 #endif
 #ifdef IS_LITTLE_ENDIAN
-
+        int i = 0;
+        switch(size) {
+            case 8: {
+                *(uint64_t*)address = data;
+                return;
+                break;
+            }
+            case 4: {
+                *(uint32_t*)address = data;
+                return;
+                break;
+            }
+            case 2: {
+                *(uint16_t*)address = data;
+                return;
+                break;
+            }
+            default: {
+                do{
+                    *(uint8_t*)(address + i) = (data >> (i * 8)) & 0xFF;
+                    i++;
+                }while(i < size);
+            }
+        }
         // LITTLE ENDIAN WRITE
         // here we will write byte after byte until we reach the given size
-        for(int i = 0; i < size; i++) {
-            *(uint8_t*)(address + i) = (data >> (i * 8)) & 0xFF;
-        }
         return;
 #endif
 }

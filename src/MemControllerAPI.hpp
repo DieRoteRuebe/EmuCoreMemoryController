@@ -83,7 +83,7 @@ struct Memory_Controller_Core {
     void debug_errors();
     void init(uint64_t size);
     void start();
-
+    void set_affinity(int core_id);
     // stops the controller and frees memory
     void stop();
     void loop();

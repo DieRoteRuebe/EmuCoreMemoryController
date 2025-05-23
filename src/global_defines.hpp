@@ -1,14 +1,20 @@
 #ifndef DEFINES_EMULATOR_HPP
 #define DEFINES_EMULATOR_HPP
 
+#define PERFORMANCE_TEST
 
 // Use these defines for controlled debugging:
 // overall and simple debugging only used for light debugging
 // The controllerthread wont be able to print debug messages when working unter heavy workload
-#define DEBUG
+#ifndef PERFORMANCE_TEST
+    #define DEBUG
+    //#define CONTROLLER_DEBUG
+#endif
 // Use this define for Thread information and controller states over stderr, stdout
 // Can result in mixed messages due to threading but prints atleast all the information you need
-#define CONTROLLER_DEBUG
+
+
+
 
 
 // make sure to define the endianness of the system
