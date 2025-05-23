@@ -3,7 +3,7 @@
 #include <iostream>
 #include <chrono>
 int main() {
-    /*
+    
     // Example 1:
     // This is the Showcase example:
     SET_LOG_LEVEL(LogLevel::LOG_DEBUG);
@@ -56,8 +56,9 @@ int main() {
     // stop will cancel all threads exit them out and free memory
     handler.stop_controllers();
     usleep(100); //simply wait for the threads to exit
-    */
-    
+
+        
+     /*
     // This is the performance example:
     MemoryControllerHandler handler;
     Memory_Controller_Core* mem_controller = new Memory_Controller_Core();
@@ -71,7 +72,7 @@ int main() {
     handler.add_controller(mem_controller);
     
     
-
+   
     const int64_t ops = 100000000; 
     queue_item in;
     uint64_t val = 0;
@@ -120,7 +121,7 @@ int main() {
     std::cout << "Ops: " << ops << std::endl;
     std::cout << "Done. Duration: " << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << "s"  << ", " << duration_ms << " ms"<< std::endl;
     handler.stop_controllers();
-    
+    */
 
     return 0;
 }
