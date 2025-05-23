@@ -2,6 +2,8 @@
 
 This project implements a high-performance, lock-free memory controller for emulation purposes, designed with future portability to hardware (e.g., FPGA, ULP core) in mind. The controller uses atomic operations, a status-byte-based queue system, and a dedicated RingBuffer for efficient communication between producers and the memory controller thread.
 
+This controller will be used and is build for my Emulator project `EmuCore`.
+
 It is recommended to use the `MemoryControllerHandler` for all memory operations, as boundary checks and controller routing are handled there.
 
 ---
